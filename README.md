@@ -108,9 +108,9 @@ Drag any `.json` file into ComfyUI to load the workflow.
 3. **Lower `resolution`** — E.g. 1024 instead of 1280, reduces both VRAM and computation
 4. **`group_offload=true`** — Last resort. Moves individual model blocks on/off GPU as needed, reducing peak allocated VRAM to ~0.2GB but **2–3x slower** due to frequent CPU↔GPU transfers. Requires `pip install diffusers>=0.37.0`
 
-#### Benchmark: `group_offload` ON vs OFF
+#### Benchmark (RTX 5090, steps=30, `cache_tag_embeds=true`)
 
-Tested on RTX 5090, resolution=1280, steps=30, `cache_tag_embeds=true` for both:
+**`group_offload` ON vs OFF (resolution=1280):**
 
 | Stage | group_offload=OFF | group_offload=ON |
 |-------|-------------------|------------------|
@@ -118,6 +118,13 @@ Tested on RTX 5090, resolution=1280, steps=30, `cache_tag_embeds=true` for both:
 | LayerDiff peak (allocated / reserved) | 7.95 GB / 13.69 GB | 0.21 GB / 7.31 GB |
 | Marigold peak | 2.49 GB | 0.07 GB |
 | **Total time** | **138 s** | **385 s (2.8x slower)** |
+
+**Resolution scaling (group_offload=OFF):**
+
+| Resolution | LayerDiff peak (allocated / reserved) | Marigold peak | Total time | Min VRAM |
+|------------|---------------------------------------|---------------|------------|----------|
+| 1280 | 7.95 GB / 13.69 GB | 2.49 GB | 138 s | ~16 GB |
+| 2048 | 7.96 GB / 22.56 GB | 2.59 GB | 382 s | ~24 GB |
 
 ## Output Layers
 

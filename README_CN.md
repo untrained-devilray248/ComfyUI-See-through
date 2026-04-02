@@ -110,9 +110,9 @@ pip install -r requirements.txt
 3. **降低 `resolution`** — 例如使用 1024 而非 1280，同时减少显存占用和计算量
 4. **`group_offload=true`** — 最后手段。按需将单个模型块移入/移出 GPU，峰值实际占用降至约 0.2GB，但由于频繁 CPU↔GPU 传输**速度慢 2–3 倍**。需要 `pip install diffusers>=0.37.0`
 
-#### 实测对比：`group_offload` 开启 vs 关闭
+#### 实测数据（RTX 5090，steps=30，`cache_tag_embeds=true`）
 
-测试环境：RTX 5090，resolution=1280，steps=30，两组均开启 `cache_tag_embeds=true`：
+**`group_offload` 开启 vs 关闭（resolution=1280）：**
 
 | 阶段 | group_offload=OFF | group_offload=ON |
 |------|-------------------|------------------|
@@ -120,6 +120,13 @@ pip install -r requirements.txt
 | LayerDiff 峰值（实际占用 / 预留） | 7.95 GB / 13.69 GB | 0.21 GB / 7.31 GB |
 | Marigold 峰值 | 2.49 GB | 0.07 GB |
 | **总耗时** | **138 秒** | **385 秒（慢 2.8 倍）** |
+
+**不同分辨率对比（group_offload=OFF）：**
+
+| 分辨率 | LayerDiff 峰值（实际占用 / 预留） | Marigold 峰值 | 总耗时 | 建议最低显存 |
+|--------|----------------------------------|---------------|--------|-------------|
+| 1280 | 7.95 GB / 13.69 GB | 2.49 GB | 138 秒 | ~16 GB |
+| 2048 | 7.96 GB / 22.56 GB | 2.59 GB | 382 秒 | ~24 GB |
 
 ## 输出图层
 
